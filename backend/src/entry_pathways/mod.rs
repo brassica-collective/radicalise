@@ -91,7 +91,7 @@ pub async fn update_eoi(
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     Path((collective_id, auth_token)): Path<(i64, String)>,
-    axum::extract::Json(submission): axum::extract::Json<ExpressionOfInterest>,
+    Json(submission): Json<ExpressionOfInterest>,
 ) -> impl IntoResponse {
     println!("Updating EOI for details: {:?}", submission);
 
@@ -131,6 +131,32 @@ pub async fn update_eoi(
         }
     }
     .into_response()
+}
+
+// Create a new end point fn to delete EOI with the simlar path parameters to the update endpoint fn.
+
+#[utoipa::path(
+    delete,
+    path = "/collective/{collective_id}/eoi/{auth_token}",
+    params(
+        ("auth_token" = String, Path, description = "Authentication token for the entry pathway"),
+        ("collective_id" = i64, Path, description = "Collective ID for the entry pathway")
+    ),
+    responses(
+        (status = 200, body = ()),
+        (status = BAD_REQUEST, body = EoiError),
+        (status = INTERNAL_SERVER_ERROR, body = ()),
+    ),
+    request_body(content = ExpressionOfInterest, content_type = "application/json")
+)]
+pub async fn delete_eoi(
+    Extension(pool): Extension<SqlitePool>,
+    Extension(realtime_state): Extension<RealtimeState>,
+    Path((collective_id, auth_token)): Path<(i64, String)>,
+) -> impl IntoResponse {
+
+    delete_eoi()
+    return (StatusCode::OK, ()).into_response();
 }
 
 #[utoipa::path(
