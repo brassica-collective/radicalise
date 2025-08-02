@@ -133,8 +133,7 @@ pub async fn update_eoi(
     .into_response()
 }
 
-// Create a new end point fn to delete EOI with the simlar path parameters to the update endpoint fn.
-
+// REVIEW creation of new end point fn to delete EOI (uses simlar path parameters to the update endpoint fn). Not yet completed.
 #[utoipa::path(
     delete,
     path = "/collective/{collective_id}/eoi/{auth_token}",
@@ -154,10 +153,20 @@ pub async fn delete_eoi(
     Extension(realtime_state): Extension<RealtimeState>,
     Path((collective_id, auth_token)): Path<(i64, String)>,
 ) -> impl IntoResponse {
-
-    delete_eoi()
-    return (StatusCode::OK, ()).into_response();
+    println!("Deleting EOI for collective ID: {}, auth token: {}", collective_id, auth_token);
+    match repo::delete_eoi_record(&pool, auth_token, CollectiveId::new(collective_id)).await {
+        Ok(_) => {
+            return (StatusCode::OK, ()).into_response();
+        }
+        Err(e) => {
+            eprintln!("Failed to delete EOI: {}", e);
+            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+        }
+    }
+    
 }
+
+//Get EOI by auth token
 
 #[utoipa::path(
     get,
@@ -191,6 +200,8 @@ pub async fn get_eoi_by_auth_token(
         }
     }
 }
+
+// Private function to broadcast entry pathway updates
 
 async fn broadcast_entry_pathway_updated(
     entry_pathway: &EntryPathway,

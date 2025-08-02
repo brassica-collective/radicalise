@@ -50,7 +50,7 @@ pub async fn update_eoi(
     return find_entry_pathway(record.id, pool).await;
 }
 
-pub async fn delete_eoi(pool: &SqlitePool, auth_token: String, collective_id: CollectiveId) -> Result<(), sqlx::Error> {
+pub async fn delete_eoi_record(pool: &SqlitePool, auth_token: String, collective_id: CollectiveId) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "DELETE FROM entry_pathways
         WHERE auth_token = ? AND collective_id = ?",
